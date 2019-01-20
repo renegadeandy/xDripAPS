@@ -46,6 +46,11 @@ Note: ensure you enter http:// (NOT https://). <api_secret> is the plain-text AP
 
 If using xDrip+ you also need to navigate to Settings > Cloud Upload > MongoDB and ensure that the "Skip LAN uploads" option is NOT selected. If you don't have this setting, update to a recent version of the xDrip+ app. (This option was added to a nightly build around December 2016).
 
+Please note xDripAPS does *not* support token based authentication. That means your API_SECRET environment variable will need to be an ordinary password. 
+
+xDripAPS has been improved to allow compatibility with OpenAPS rigs which are setup to use a token for their API_SECRET. This compatibility works by users configuring a second API_SECRET_xDripAPS variable setting a password for xDrip to use during upload.
+
+Make sure that this API_SECRET_xDripAPS variable is set to the SHA1 hashed version of whatever you type into your password component of the <password>@<host>:<port> in the baseURL of the xDrip Nightscout uploader.  
 
 
 
@@ -102,3 +107,11 @@ If using xDrip+ you also need to navigate to Settings > Cloud Upload > MongoDB a
   openaps device add xdrip process 'bash -c "curl -s http://localhost:5000/api/v1/entries?count=288"'
   openaps report add monitor/glucose.json text xdrip shell
   ```
+
+
+**Additions by Andy Armstrong making version 2**
+1/Added checking for API_SECRET and won't start unless this, or API_SECRET_xDripAPS environment variable is set
+2/Added support for second environment variable API_SECRET_xDripAPS to allow for compatibility to run xDripAPS when OpenAPS users are using token based authentication with their API_SECRET value for Nightscout, and would like to be able to use the basic environment variable based password for their xDrip+ integration with xDripAPS.
+3/Added error output when api-secret header isn't sent instead of just letting the program return a 500
+4/Changed header from Api_Secret to api-secret as xDrip+ doesn't send Api_Secret anymore and therefore this update makes the loop work again when using the latest version of xDrip.
+5/Added a persisted log file for xDripAPS. Each log will be 2 megabytes and there is a 2 file rollover scheme, meaning at maximum there will be a current working log, and 2 historical log files, to be able to track a sensible amount of historical logs to assist with problem determination.
