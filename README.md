@@ -115,4 +115,5 @@ Make sure that this API_SECRET_xDripAPS variable is set to the SHA1 hashed versi
 3/Added error output when api-secret header isn't sent instead of just letting the program return a 500
 4/Changed header from Api_Secret to api-secret as xDrip+ doesn't send Api_Secret anymore and therefore this update makes the loop work again when using the latest version of xDrip.
 5/Added a persisted log file for xDripAPS. Each log will be 2 megabytes and there is a 2 file rollover scheme, meaning at maximum there will be a current working log, and 2 historical log files, to be able to track a sensible amount of historical logs to assist with problem determination.
+7/Bugfix where we now perform a lowercase comparison meaning that if case between stored API_SECRET variables and value passed into the call are compared, we do it in a case insensitive manner.
 6/You will now need to alter your crontab to include the API_SECRET_xDripAPS environment variable. Use crontab -e and add it under your existing API_SECRET entry.
