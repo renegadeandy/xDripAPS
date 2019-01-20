@@ -186,7 +186,7 @@ class Entries(Resource):
             env_secret_hashed = os.environ['API_SECRET_xDripAPS']
             xLog("We will authenticate using environment variable API_SECRET_xDripAPS:"+env_secret_hashed)
        
-       elif api_secret:
+        elif api_secret:
             # Get API_SECRET environment variable
             env_secret_hashed = os.environ['API_SECRET']
             xLog("We will authenticate using environment variable API_SECRET:"+env_secret_hashed)
