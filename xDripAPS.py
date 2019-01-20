@@ -181,16 +181,16 @@ class Entries(Resource):
             xLog("Client didn't pass in Api-Secret header")
             return 'Client didnt pass in Api-Secret header',500
 
-        if api_secret:
-            # Get API_SECRET environment variable
-            env_secret_hashed = os.environ['API_SECRET']
-            xLog("We will authenticate using environment variable API_SECRET:"+env_secret_hashed)
-
-        elif api_secret_xDripAPS:
+        if api_secret_xDripAPS:
             #get API_SECRET_xDripAPS environment variable if needed
             env_secret_hashed = os.environ['API_SECRET_xDripAPS']
             xLog("We will authenticate using environment variable API_SECRET_xDripAPS:"+env_secret_hashed)
        
+       elif api_secret:
+            # Get API_SECRET environment variable
+            env_secret_hashed = os.environ['API_SECRET']
+            xLog("We will authenticate using environment variable API_SECRET:"+env_secret_hashed)
+
         # Authentication check
         if request_secret_hashed.lower() != env_secret_hashed.lower():
             xLog('Authentication failure!')
