@@ -168,6 +168,7 @@ class Entries(Resource):
             results_as_dict.append(result_as_dict)
 
         conn.close()
+        xLog("GET request returning "+ str(len(result_as_dict))+" results successfully")
         return results_as_dict
 
     def post(self):
@@ -234,7 +235,7 @@ class Entries(Resource):
             inserted_entries.append(entry)
 
         conn.close()
-
+        xLog("POST request added "+ str(len(inserted_entries))+" entries successfully")
         # return entries that have been added successfully
         return inserted_entries, 200
 
