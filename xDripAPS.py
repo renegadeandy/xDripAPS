@@ -24,9 +24,9 @@ api_secret = True
 api_secret_xDripAPS = True
 
 def create_schema():
-    print "Creating database at:"+DB_FILE
+    xLog("Creating database at:"+DB_FILE)
     if not os.path.exists(os.environ['HOME']+ "/.xDripAPS_data/"):
-        print ".xDripAPS_data folder didn't exist so creating it"
+        xLog(".xDripAPS_data folder didn't exist so creating it")
         os.makedirs(os.environ['HOME']+ "/.xDripAPS_data/")
 
     conn = sqlite3.connect(DB_FILE)
@@ -48,13 +48,11 @@ def create_schema():
 
 def startup_checks():
     
-    print "Performing xDripAPS startup checks"
+    xLog("Performing xDripAPS startup checks")
    
     #We are referencing our global variables here
     global api_secret
     global api_secret_xDripAPS
-
-    app_log.info("Performing xDripAPS startup checks")
 
     # Does .db file exist?
     if os.path.isfile(DB_FILE):
@@ -64,43 +62,49 @@ def startup_checks():
         c.execute("PRAGMA integrity_check")
         status = str(c.fetchone()[0])
         if status == "ok":
-            print "Startup checks OK"
+            xLog("Startup checks OK")
             conn.close()
         else:
-            print "Startup checks FAIL"
+            xLog("Startup checks FAIL")
             # Delete corrupt database
-            print "Deleting corrupt SQLite database file (" + DB_FILE + ")..."
+            xLog("Deleting corrupt SQLite database file (" + DB_FILE + ")...")
             conn.close()
             os.remove(DB_FILE)
             # re-create database
-            print "Re-cresting database..."
+            xLog("Re-cresting database...")
             create_schema()
     else:
         # Database doesn't exist, so create it
-        print "Database doesn't exist yet, so creating it"
+        xLog("Database doesn't exist yet, so creating it")
         create_schema()
-    print "Checking that environment variables are setup for authorisation"
+    
+    xLog("Checking that environment variables are setup for authorisation")
     try: 
         os.environ['API_SECRET']
-        print "API_SECRET is set."
+        xLog("API_SECRET is set.")
     except:
         api_secret = False
-        print "API_SECRET is not set."
+        xLog("API_SECRET is not set.")
     try:
         os.environ['API_SECRET_xDripAPS']
-        print "API_SECRET_xDripAPS is set."
+        xLog("API_SECRET_xDripAPS is set.")
     except:
         api_secret_xDripAPS = False
-        print "API_SECRET_xDripAPS is not set."
+        xLog("API_SECRET_xDripAPS is not set.")
 
     if api_secret == False and api_secret_xDripAPS == False:
-        print "Neither API_SECRET or API_SECRET_xDripAPS is set. Please set one and run again!"
+        xLog("Neither API_SECRET or API_SECRET_xDripAPS is set. Please set one and run again!")
         sys.exit(1)
 
 def setup_logging():
 
-    log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s(%(lineno)d) %(message)s')
-    logFile = 'xDripAPS-{:%d-%m-%Y}.log'.format(datetime.now())
+    log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(funcName)s %(message)s')
+    logFile = '/var/log/openaps/xDripAPS-{:%d-%m-%Y}.log'.format(datetime.now())
+    
+    if not os.path.exists("/var/log/openaps"):
+        print "/var/log/openaps directory doesn't exist! You should create this before continuing. We won't create this for you, as we expected something else, like an openaps rig to have created this for you already!"
+        sys.exit(1)
+
     my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=2*1024*1024, 
                                  backupCount=2, encoding=None, delay=0)
     my_handler.setFormatter(log_formatter)
@@ -110,7 +114,13 @@ def setup_logging():
     app_log.setLevel(logging.INFO)
     app_log.addHandler(my_handler)
     
-    app_log.info("data")
+    xLog("xDrip APS log setup complete, find the log here:"+logFile)
+
+def xLog(message):
+    global app_log
+    print message
+    app_log.info(message)
+    return
 
 class Entries(Resource):
 
@@ -141,7 +151,7 @@ class Entries(Resource):
 
         for row in cursor:
             result_as_dict = {
-#       '_id' : row[0],
+            #       '_id' : row[0],
                 'device' : row[1],
                 'date' : row[2],
                 'dateString' : row[3],
@@ -156,35 +166,35 @@ class Entries(Resource):
             results_as_dict.append(result_as_dict)
 
         conn.close()
-    return results_as_dict
+        return results_as_dict
 
     def post(self):
 
         # Get hashed API secret from request
         try:
             request_secret_hashed = request.headers['Api_Secret']
-            print 'request_secret_hashed : ' + request_secret_hashed
+            xLog('request_secret_hashed : ' + request_secret_hashed)
         except:
-            print "Client didn't pass in Api-Secret header"
+            xLog("Client didn't pass in Api-Secret header")
             return 'Client didnt pass in Api-Secret header',500
 
         if api_secret:
             # Get API_SECRET environment variable
             env_secret_hashed = os.environ['API_SECRET']
-            print "We authenticated using environment variable API_SECRET"
+            xLog("We will authenticate using environment variable API_SECRET")
 
         elif api_secret_xDripAPS:
             #get API_SECRET_xDripAPS environment variable if needed
             env_secret_hashed = os.environ['API_SECRET_xDripAPS']
-            print "We will authenticate using environment variable API_SECRET_xDripAPS"
+            xLog("We will authenticate using environment variable API_SECRET_xDripAPS")
        
         # Authentication check
         if request_secret_hashed != env_secret_hashed:
-            print 'Authentication failure!'
-            print 'API Secret passed in request does not match your API_SECRET or API_SECRET_xDripAPS environment variable'
+            xLog('Authentication failure!')
+            xLog('API Secret passed in request does not match your API_SECRET or API_SECRET_xDripAPS environment variable')
             return 'Authentication failed!', 401
 
-        print "Authentication successfull"
+        xLog("Authentication successful")
         # Get JSON data
         json_data = request.get_json(force=True)
 
@@ -230,15 +240,15 @@ class Test(Resource):
     def get(self):
         # Get hashed API secret from request
         request_secret_hashed = request.headers['Api_Secret']
-        print 'request_secret_hashed : ' + request_secret_hashed
+        xLog('request_secret_hashed : ' + request_secret_hashed)
 
         # Get API_SECRET environment variable
         env_secret_hashed = os.environ['API_SECRET']
 
         # Authentication check
         if request_secret_hashed != env_secret_hashed:
-            print 'Authentication failure!'
-            print 'API Secret passed in request does not match API_SECRET environment variable'
+            xLog('Authentication failure!')
+            xLog('API Secret passed in request does not match API_SECRET environment variable')
             return 'Authentication failed!', 401
 
         return {"status": 'ok'}
