@@ -8,10 +8,11 @@ from flask_restful import Resource, Api
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
+#Software version
+xDripAPS_version = 2
+
 # Maximum number of rows to retain - older rows will be deleted to minimise disk usage
 MAX_ROWS = 336
-
-
 
 # SQLite3 .db filename
 DB_FILE = os.environ['HOME']+ "/.xDripAPS_data/xDripAPS.db"
@@ -114,6 +115,7 @@ def setup_logging():
     app_log.setLevel(logging.INFO)
     app_log.addHandler(my_handler)
     
+    xLog("Booting up xDripAPS version "+str(xDripAPS_version))
     xLog("xDrip APS log setup complete, find the log here:"+logFile)
 
 def xLog(message):
