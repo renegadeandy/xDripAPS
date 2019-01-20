@@ -192,7 +192,7 @@ class Entries(Resource):
             xLog("We will authenticate using environment variable API_SECRET_xDripAPS")
        
         # Authentication check
-        if request_secret_hashed != env_secret_hashed:
+        if request_secret_hashed.lower() != env_secret_hashed.lower():
             xLog('Authentication failure!')
             xLog('API Secret passed in request does not match your API_SECRET or API_SECRET_xDripAPS environment variable')
             return 'Authentication failed!', 401
