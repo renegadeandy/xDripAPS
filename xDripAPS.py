@@ -5,7 +5,7 @@ import sys
 import logging
 from flask import Flask, request
 from flask_restful import Resource, Api
-from logging.handlers import RotatingFileHandler
+from logging import FileHandler
 from datetime import datetime
 
 #Software version
@@ -106,8 +106,7 @@ def setup_logging():
         print "/var/log/openaps directory doesn't exist! You should create this before continuing. We won't create this for you, as we expected something else, like an openaps rig to have created this for you already!"
         sys.exit(1)
 
-    my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=2*1024*1024, 
-                                 backupCount=2, encoding=None, delay=0)
+    my_handler = FileHandler(logFile, mode='a',encoding=None, delay=0)
     my_handler.setFormatter(log_formatter)
     my_handler.setLevel(logging.INFO)
     
